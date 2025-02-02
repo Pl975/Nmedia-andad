@@ -18,15 +18,22 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
+
     @Inject
-    lateinit var auth: AppAuth
+    lateinit var appAuth: AppAuth
+
+    @Inject
+    lateinit var firebaseMessaging: FirebaseMessaging
+
+    @Inject
+    lateinit var googleApiAvailability: GoogleApiAvailability
     private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,19 +91,19 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 when (menuItem.itemId) {
                     R.id.signin -> {
                         // TODO: just hardcode it, implementation must be in homework
-                        auth.setAuth(5, "x-token")
+                        appAuth.setAuth(5, "x-token")
                         true
                     }
 
                     R.id.signup -> {
                         // TODO: just hardcode it, implementation must be in homework
-                        auth.setAuth(5, "x-token")
+                        appAuth.setAuth(5, "x-token")
                         true
                     }
 
                     R.id.signout -> {
                         // TODO: just hardcode it, implementation must be in homework
-                        auth.removeAuth()
+                        appAuth.removeAuth()
                         true
                     }
 
@@ -121,7 +128,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     }
 
     private fun checkGoogleApiAvailability() {
-        with(GoogleApiAvailability.getInstance()) {
+        with(googleApiAvailability) {
             val code = isGooglePlayServicesAvailable(this@AppActivity)
             if (code == ConnectionResult.SUCCESS) {
                 return@with
@@ -132,6 +139,9 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
             }
             Toast.makeText(this@AppActivity, R.string.google_play_unavailable, Toast.LENGTH_LONG)
                 .show()
+        }
+        firebaseMessaging.token.addOnSuccessListener {
+            println(it)
         }
     }
 }
