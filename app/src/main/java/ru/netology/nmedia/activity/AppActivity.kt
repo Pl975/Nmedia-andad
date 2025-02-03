@@ -39,6 +39,8 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requestNotificationsPermission()
+
         intent?.let {
             if (it.action != Intent.ACTION_SEND) {
                 return@let
@@ -61,16 +63,6 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
         viewModel.data.observe(this) {
             invalidateOptionsMenu()
-        }
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                println("some stuff happened: ${task.exception}")
-                return@addOnCompleteListener
-            }
-
-            val token = task.result
-            println(token)
         }
 
         checkGoogleApiAvailability()
