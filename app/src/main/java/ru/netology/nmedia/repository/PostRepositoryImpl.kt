@@ -22,6 +22,7 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import ru.netology.nmedia.repository.PostRepository.Companion.pageSize
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,7 +38,7 @@ class PostRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<Post>> = Pager(
-        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
+        config = PagingConfig(pageSize = pageSize, enablePlaceholders = false),
         pagingSourceFactory = { postDao.getPagingSource() },
         remoteMediator = PostRemoteMediator(
             service = apiService,
@@ -48,9 +49,11 @@ class PostRepositoryImpl @Inject constructor(
     ).flow
         .map { it.map(PostEntity::toDto) }
 
-    override suspend fun getAll() {
+//    override suspend fun getAll() {
+        override suspend fun getInitialPostPage() {
         try {
-            val response = apiService.getAll()
+//            val response = apiService.getAll()
+            val response = apiService.getLatest(pageSize)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -127,5 +130,9 @@ class PostRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             throw UnknownError
         }
+    }
+
+    override suspend fun retry() {
+        TODO("Not yet implemented")
     }
 }
